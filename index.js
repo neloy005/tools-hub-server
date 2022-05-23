@@ -55,6 +55,19 @@ async function run() {
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         })
+        app.put('/tool/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateAvailable = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    available: updateAvailable.available,
+                }
+            };
+            const result = await toolsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result);
+        });
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;

@@ -34,6 +34,7 @@ async function run() {
         await client.connect();
         const toolsCollection = client.db('tools-hub').collection('tools');
         const usersCollection = client.db('tools-hub').collection('users');
+        const ordersCollection = client.db('tools-hub').collection('orders');
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -48,6 +49,12 @@ async function run() {
             const tool = await toolsCollection.findOne(query);
             res.send(tool);
         });
+        app.post('/order', async (req, res) => {
+            const order = req.body;
+            console.log('adding', order);
+            const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        })
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;

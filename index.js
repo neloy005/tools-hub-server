@@ -42,7 +42,7 @@ async function run() {
             res.send(tools);
         });
 
-        app.get('/tool/:id', async (req, res) => {
+        app.get('/tool/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const tool = await toolsCollection.findOne(query);

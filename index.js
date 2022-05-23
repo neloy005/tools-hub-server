@@ -54,7 +54,15 @@ async function run() {
             console.log('adding', order);
             const result = await ordersCollection.insertOne(order);
             res.send(result);
-        })
+        });
+
+        app.get('/order', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query = { email: email }
+            const orders = await ordersCollection.find(query).toArray();
+            res.send(orders);
+        });
         app.put('/tool/:id', async (req, res) => {
             const id = req.params.id;
             const updateAvailable = req.body;

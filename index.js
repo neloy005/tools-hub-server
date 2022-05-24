@@ -45,6 +45,16 @@ async function run() {
             const tools = await cursor.toArray();
             res.send(tools);
         });
+        app.get('/users', verifyJWT, async (req, res) => {
+            const users = await usersCollection.find().toArray();
+            res.send(users);
+        });
+        app.get('/orders', async (req, res) => {
+            const query = {};
+            const cursor = ordersCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        });
 
         app.get('/tool/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
@@ -79,6 +89,7 @@ async function run() {
                 $set: {
                     isPaid: true,
                     transectionId: payment.transectionId,
+                    status: payment.status
                 }
             }
             const result = await paymentCollection.insertOne(payment);
@@ -120,7 +131,17 @@ async function run() {
             const order = await ordersCollection.findOne(query);
             res.send(order);
         });
-
+        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -147,5 +168,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Doctors app listening on port ${port}`)
+    console.log(`Tools hub listening on port ${port}`)
 })

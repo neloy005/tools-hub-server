@@ -39,6 +39,18 @@ async function run() {
         const ordersCollection = client.db('tools-hub').collection('orders');
         const paymentCollection = client.db('tools-hub').collection('payments');
 
+
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await usersCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' });
+            }
+        }
+
         app.get('/tools', async (req, res) => {
             const query = {};
             const cursor = toolsCollection.find(query);
@@ -131,8 +143,9 @@ async function run() {
             const order = await ordersCollection.findOne(query);
             res.send(order);
         });
-        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+        app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;
+
             const filter = { email: email };
             const updateDoc = {
                 $set: {

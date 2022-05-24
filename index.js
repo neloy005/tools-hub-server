@@ -4,6 +4,8 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const app = express();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const port = process.env.PORT || 5000;
 
 //middletear
@@ -35,6 +37,7 @@ async function run() {
         const toolsCollection = client.db('tools-hub').collection('tools');
         const usersCollection = client.db('tools-hub').collection('users');
         const ordersCollection = client.db('tools-hub').collection('orders');
+        const paymentCollection = client.db('tools-hub').collection('payments');
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -54,6 +57,33 @@ async function run() {
             console.log('adding', order);
             const result = await ordersCollection.insertOne(order);
             res.send(result);
+        });
+
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const order = req.body;
+            const price = order.toPay;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card'],
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        });
+        app.patch('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            console.log(payment);
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    isPaid: true,
+                    transectionId: payment.transectionId,
+                }
+            }
+            const result = await paymentCollection.insertOne(payment);
+            const updateOrder = await ordersCollection.updateOne(filter, updatedDoc);
+            res.send(updatedDoc);
         });
 
         app.get('/order', verifyJWT, async (req, res) => {
@@ -82,6 +112,13 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
             res.send(result);
+        });
+
+        app.get('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await ordersCollection.findOne(query);
+            res.send(order);
         });
 
         app.put('/user/:email', async (req, res) => {

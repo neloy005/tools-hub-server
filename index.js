@@ -57,6 +57,7 @@ async function run() {
             const tools = await cursor.toArray();
             res.send(tools);
         });
+
         app.get('/users', verifyJWT, async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users);
@@ -130,12 +131,19 @@ async function run() {
             res.send(result);
         });
 
+        app.delete('/tool/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await toolsCollection.deleteOne(query);
+            res.send(result);
+        });
         app.delete('/order/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
             res.send(result);
         });
+
 
         app.get('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;

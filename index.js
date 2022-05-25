@@ -38,6 +38,7 @@ async function run() {
         const usersCollection = client.db('tools-hub').collection('users');
         const ordersCollection = client.db('tools-hub').collection('orders');
         const paymentCollection = client.db('tools-hub').collection('payments');
+        const reviewCollection = client.db('tools-hub').collection('reviews');
 
 
         const verifyAdmin = async (req, res, next) => {
@@ -75,6 +76,14 @@ async function run() {
             const tool = await toolsCollection.findOne(query);
             res.send(tool);
         });
+
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            console.log('adding', review);
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
+
         app.post('/order', async (req, res) => {
             const order = req.body;
             console.log('adding', order);

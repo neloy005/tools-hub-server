@@ -40,6 +40,7 @@ async function run() {
         const paymentCollection = client.db('tools-hub').collection('payments');
         const reviewCollection = client.db('tools-hub').collection('reviews');
         const faqCollection = client.db('tools-hub').collection('faq');
+        const buyerCollection = client.db('tools-hub').collection('buyer');
 
 
         const verifyAdmin = async (req, res, next) => {
@@ -66,6 +67,14 @@ async function run() {
             const faq = await cursor.toArray();
             res.send(faq);
         });
+
+        app.get('/buyers', async (req, res) => {
+            const query = {};
+            const cursor = buyerCollection.find(query);
+            const buyers = await cursor.toArray();
+            res.send(buyers);
+        });
+
         app.get('/tools', async (req, res) => {
             const query = {};
             const cursor = toolsCollection.find(query);

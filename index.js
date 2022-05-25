@@ -179,7 +179,14 @@ async function run() {
             const user = await usersCollection.findOne({ email: email });
             const isAdmin = (user.role === 'admin');
             res.send({ admin: isAdmin });
-        })
+        });
+
+        app.get('/user', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query);
+            res.send(user);
+        });
 
         app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.params.email;

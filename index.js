@@ -115,6 +115,26 @@ async function run() {
             });
             res.send({ clientSecret: paymentIntent.client_secret })
         });
+
+        app.patch('/user/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const myProfile = req.body;
+            console.log(myProfile);
+            const filter = { email: email };
+            const updatedDoc = {
+                $set: {
+                    fullName: myProfile.fullName,
+                    education: myProfile.education,
+                    location: myProfile.location,
+                    phone: myProfile.phone,
+                    linkedln: myProfile.linkedln,
+
+                }
+            }
+
+            const updateUser = await usersCollection.updateOne(filter, updatedDoc);
+            res.send(updatedDoc);
+        });
         app.patch('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const payment = req.body;

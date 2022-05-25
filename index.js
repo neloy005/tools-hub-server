@@ -62,7 +62,7 @@ async function run() {
             const users = await usersCollection.find().toArray();
             res.send(users);
         });
-        app.get('/orders', async (req, res) => {
+        app.get('/orders', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {};
             const cursor = ordersCollection.find(query);
             const orders = await cursor.toArray();
@@ -81,6 +81,28 @@ async function run() {
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
+        app.post('/tool', async (req, res) => {
+            const tool = req.body;
+            console.log('adding', tool);
+            const result = await toolsCollection.insertOne(tool);
+            res.send(result);
+        });
+
+        app.put('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const statusCondition = req.body;
+            console.log(statusCondition);
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    status: statusCondition.status,
+                }
+            };
+            const result = await ordersCollection.updateOne(filter, updatedDoc, options)
+            res.send(result);
+        });
+
 
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const order = req.body;

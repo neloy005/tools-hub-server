@@ -86,6 +86,7 @@ async function run() {
             const users = await usersCollection.find().toArray();
             res.send(users);
         });
+
         app.get('/orders', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {};
             const cursor = ordersCollection.find(query);
@@ -205,7 +206,7 @@ async function run() {
             res.send(result);
         });
 
-        app.delete('/tool/:id', async (req, res) => {
+        app.delete('/tool/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await toolsCollection.deleteOne(query);
